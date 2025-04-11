@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <title>五子棋游戏</title>
+    <style>
+        #board {
+            border-collapse: collapse;
+        }
+
+        #board td {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .black {
+            background-color: #000;
+            border-radius: 50%;
+        }
+
+        .white {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
+    <h1 class="text-3xl font-bold mb-4">五子棋游戏</h1>
+    <table id="board"></table>
+    <button id="undo-btn" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        <i class="fa-solid fa-undo"></i> 悔棋
+    </button>
+    <script>
+        const boardSize = 20; // 修改棋盘大小为 20x20
+        const board = document.getElementById('board');
+        const undoBtn = document.getElementById('undo-btn');
+        const moves = [];
+        let currentPlayer = 'black';
+
+        // 创建棋盘
+        for (let i = 0; i < boardSize; i++) {
+            const row = document.createElement('tr');
+            for (let j = 0; j < boardSize; j++) {
+                const cell = document.createElement('td');
+                cell.dataset.row = i;
+                cell.dataset.col = j;
+                cell.addEventListener('click', handleCellClick);
+                row.appendChild(cell);
+            }
+            board.appendChild(row);
+        }
+
+        // 处理单元格点击事件
+        function handleCellClick() {
+            const row = parseInt(this.dataset.row);
+            const col = parseInt(this.dataset.col);
+
+            if (this.classList.contains('black') || this.classList.contains('white')) {
+                return;
+            }
+
+            this.classList.add(currentPlayer);
+            moves.push({ row, col, player: currentPlayer });
+
+            if (checkWin(row, col, currentPlayer)) {
+                alert(`${currentPlayer === 'black' ? '黑子' : '白子'} 获胜！`);
+                resetGame();
+            } else {
+                currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+            }
+        }
+
+        // 检查是否获胜
+        function checkWin(row, col, player) {
+            const directions = [
+                [1, 0], [0, 1], [1, 1], [1, -1]
+            ];
+
+            for (const [dx, dy] of directions) {
+                let count = 1;
+
+                // 正向检查
+                for (let i = 1; i < 5; i++) {
+                    const newRow = row + i * dx;
+                    const newCol = col + i * dy;
+                    if (isValidCell(newRow, newCol) && getCell(newRow, newCol).classList.contains(player)) {
+                        count++;
+                    } else {
+                        break;
+                    }
+                }
+
+                // 反向检查
+                for (let i = 1; i < 5; i++) {
+                    const newRow = row - i * dx;
+                    const newCol = col - i * dy;
+                    if (isValidCell(newRow, newCol) && getCell(newRow, newCol).classList.contains(player)) {
+                        count++;
+                    } else {
+                        break;
+                    }
+                }
+
+                if (count >= 5) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // 检查单元格是否有效
+        function isValidCell(row, col) {
+            return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
+        }
+
+        // 获取单元格元素
+        function getCell(row, col) {
+            return board.rows[row].cells[col];
+        }
+
+        // 悔棋功能
+        undoBtn.addEventListener('click', function () {
+            if (moves.length === 0) {
+                return;
+            }
+
+            const lastMove = moves.pop();
+            const cell = getCell(lastMove.row, lastMove.col);
+            cell.classList.remove(lastMove.player);
+            currentPlayer = lastMove.player;
+        });
+
+        // 重置游戏
+        function resetGame() {
+            moves.length = 0;
+            currentPlayer = 'black';
+            const cells = board.querySelectorAll('td');
+            cells.forEach(cell => {
+                cell.classList.remove('black', 'white');
+            });
+        }
+    </script>
+</body>
+
+</html>
+    

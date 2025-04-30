@@ -1,155 +1,291 @@
-<!DOCTYPE html>
-<html lang="en">
-
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
-    <title>五子棋游戏</title>
+    <title>五子棋</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        #board {
-            border-collapse: collapse;
+        body {
+            background: linear-gradient(135deg,#fbeee5 0%,#eacba2 100%);
+            min-height: 100vh;
+            font-family: "华文行楷","微软雅黑","PingFang SC",Arial,sans-serif;
+            color: #492F13;
+            margin: 0;
         }
-
-        #board td {
+        h1 {
+            margin-top: 33px;
+            font-size: 2.5em;
+            font-family: "华文行楷","STKaiti","微软雅黑",serif;
+            letter-spacing: 6px;
+            color: #986630;
+            text-shadow: 0 2px 14px #fff6ed, 0 1px 2px #bb896090;
+        }
+        .main-wrap {
+            background: rgba(254,253,244,0.93);
+            margin: 30px auto 0 auto;
+            border-radius: 22px;
+            max-width: max-content;
+            padding: 34px 40px 30px 40px;
+            border: 2px solid #dab878cc;
+            box-shadow: 0 3px 24px #bead8766,0 0 4px #8c713d;
+            min-width: 390px;
+        }
+        .board-outer {
+            display: inline-block;
+            position: relative;
+        }
+        table#gomokuBoard {
+            border-collapse: separate;
+            border-spacing: 0;
+            background:linear-gradient(120deg,#e0b97a 0%, #efd28d 80%, #fff9ee 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 28px #d6b88570, 0 0 1px #88632e;
+            border: 2.5px solid #b8995c;
+        }
+        #gomokuBoard td, #gomokuBoard th {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            min-height: 36px;
+            box-sizing: border-box;
+            text-align: center;
+            vertical-align: middle;
+            font-family: Arial, '微软雅黑';
+            padding: 0;
+        }
+        #gomokuBoard td.cell {
+            border: 1.1px solid #c9a14e;
+            border-radius: 6px;
+            background: rgba(255,255,230,0.035);
+            cursor: pointer;
+            position: relative;
+            transition: background 0.18s, box-shadow 0.12s;
+            z-index: 1;
+        }
+        #gomokuBoard td.cell:hover {
+            background: linear-gradient(135deg, #d3ee1b18 0%, #b5f2761a 90%);
+            box-shadow: 0 0 10px #bcd74944,0 0 3px #fff8;
+            z-index: 2;
+        }
+        .piece {
             width: 30px;
             height: 30px;
-            border: 1px solid #ccc;
-            cursor: pointer;
+            border-radius: 50%;
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            box-sizing: border-box;
+            z-index: 8;
         }
-
         .black {
-            background-color: #000;
+            background: radial-gradient(circle at 68% 29%, #424142 65%, #141416 100%);
+            box-shadow: 0 3px 16px #3d1b1990, 0 1px 8px #9e86533a;
+            border: 2px solid #211a1bcc;
+        }
+        .white {
+            background: radial-gradient(circle at 52% 38%, #fff 80%, #dedcd5 100%);
+            border: 2px solid #d4cab7;
+            box-shadow: 0 4px 18px #c7c6c380, 0 1px 5px #afafaca0;
+        }
+        .marker {
+            outline: 3px solid #ffa919b3;
+            box-shadow: 0 0 15px #ffe87a,0 0 4px #fff60099;
+            animation: markerflash 0.70s;
+        }
+        @keyframes markerflash {
+            0%{box-shadow:0 0 28px #e5f75bf2;}
+            80%{box-shadow:0 0 10px #f9e377;}
+            100%{box-shadow:0 0 3px #ffe87a;}
+        }
+        /* 星位 */
+        .star {
+            position:absolute;
+            left:50%; top:50%;
+            transform:translate(-50%,-50%);
+            width: 7px;
+            height: 7px;
+            background: #544514;
             border-radius: 50%;
         }
-
-        .white {
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 50%;
+        /* 棋盘左数字，顶字母 */
+        .thx, .thy {
+            font-size: 13px;
+            color:#ab9251;
+            font-family:Arial;
+            user-select: none;
+            background: none !important;
+            border: none !important;
+            font-weight:bold;
+        }
+        /* 状态栏和按钮 */
+        #status {
+            font-size: 20px;
+            color: #284022;
+            padding: 7px 15px;
+            min-height: 29px;
+            background:rgba(255,255,247,0.64);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .controls {
+            text-align:center;
+            margin-top:8px;
+        }
+        button {
+            background: linear-gradient(to bottom,#fce9b8 0%,#ddc67a 100%);
+            border: none;
+            padding: 9px 34px;
+            border-radius: 8px;
+            font-size: 18px;
+            color: #765b22;
+            font-weight: bold;
+            margin: 0 19px 8px 19px;
+            cursor: pointer;
+            box-shadow: 0 2px 9px #d2b77269;
+            transition: background 0.15s, box-shadow 0.12s;
+            outline: none;
+        }
+        button:active, button:focus {
+            background: #ffe38a;
+            color: #226a36;
+            box-shadow: 0 0 4px #ab9947cc;
+        }
+        button:disabled {
+            background: #efefea;
+            color: #beae7b;
+            box-shadow: none;
+            cursor: default;
+        }
+        @media (max-width:700px) {
+            .main-wrap{padding:7px; min-width:unset;}
+            #gomokuBoard td, #gomokuBoard th {width:18px; height:18px; min-width: 18px; min-height: 18px;}
+            .piece {width:10px; height:10px; left:4px; top:4px;}
         }
     </style>
 </head>
-
-<body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
-    <h1 class="text-3xl font-bold mb-4">五子棋游戏</h1>
-    <table id="board"></table>
-    <button id="undo-btn" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        <i class="fa-solid fa-undo"></i> 悔棋
-    </button>
-    <script>
-        const boardSize = 20; // 修改棋盘大小为 20x20
-        const board = document.getElementById('board');
-        const undoBtn = document.getElementById('undo-btn');
-        const moves = [];
-        let currentPlayer = 'black';
-
-        // 创建棋盘
-        for (let i = 0; i < boardSize; i++) {
-            const row = document.createElement('tr');
-            for (let j = 0; j < boardSize; j++) {
-                const cell = document.createElement('td');
-                cell.dataset.row = i;
-                cell.dataset.col = j;
-                cell.addEventListener('click', handleCellClick);
-                row.appendChild(cell);
+<body>
+    <h1>五子棋对弈</h1>
+    <div class="main-wrap">
+        <div id="status"></div>
+        <div class="board-outer">
+            <table id="gomokuBoard"></table>
+        </div>
+        <div class="controls">
+            <button onclick="undoMove()" id="undoBtn">悔棋</button>
+            <button onclick="restartGame()">重新开始</button>
+        </div>
+    </div>
+<script>
+const BOARD_SIZE = 15;
+let board = [], history = [], curPlayer = "black", gameOver = false, lastMove = null;
+function createBoardArr() {
+    board = Array.from({length: BOARD_SIZE}, () => Array(BOARD_SIZE).fill(null));
+    history = []; curPlayer = "black"; gameOver = false; lastMove = null;
+}
+function renderBoard() {
+    const table = document.getElementById("gomokuBoard");
+    table.innerHTML = "";
+    // 表头 字母
+    let thead = "<tr><th class='thx'></th>";
+    for(let c=0;c<BOARD_SIZE;c++){
+        thead+=`<th class='thx'>${String.fromCharCode(65+c)}</th>`;
+    }
+    thead+="</tr>";
+    table.insertAdjacentHTML('beforeend', thead);
+    // 主体
+    for(let r=0;r<BOARD_SIZE;r++){
+        let row = `<tr><th class='thy'>${r+1}</th>`;
+        for(let c=0;c<BOARD_SIZE;c++){
+            let classes = "cell";
+            let cellId = "cell-" + r + "-" + c;
+            let extra = "";
+            if(lastMove&&r===lastMove[0]&&c===lastMove[1]) classes+=" marker";
+            row += `<td class="${classes}" id="${cellId}" data-row="${r}" data-col="${c}"></td>`;
+        }
+        row += "</tr>";
+        table.insertAdjacentHTML('beforeend', row);
+    }
+    // 加载棋子和星位
+    for(let r=0;r<BOARD_SIZE;r++){
+        for(let c=0;c<BOARD_SIZE;c++){
+            let cell = document.getElementById(`cell-${r}-${c}`);
+            cell.onclick = cellClick;
+            // 星位
+            if((r===3||r===7||r===11)&&(c===3||c===7||c===11) && !board[r][c]){
+                let star = document.createElement("div");
+                star.className="star";
+                cell.appendChild(star);
             }
-            board.appendChild(row);
-        }
-
-        // 处理单元格点击事件
-        function handleCellClick() {
-            const row = parseInt(this.dataset.row);
-            const col = parseInt(this.dataset.col);
-
-            if (this.classList.contains('black') || this.classList.contains('white')) {
-                return;
-            }
-
-            this.classList.add(currentPlayer);
-            moves.push({ row, col, player: currentPlayer });
-
-            if (checkWin(row, col, currentPlayer)) {
-                alert(`${currentPlayer === 'black' ? '黑子' : '白子'} 获胜！`);
-                resetGame();
-            } else {
-                currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+            if(board[r][c]){
+                let piece = document.createElement("div");
+                piece.className = "piece " + board[r][c];
+                cell.appendChild(piece);
             }
         }
-
-        // 检查是否获胜
-        function checkWin(row, col, player) {
-            const directions = [
-                [1, 0], [0, 1], [1, 1], [1, -1]
-            ];
-
-            for (const [dx, dy] of directions) {
-                let count = 1;
-
-                // 正向检查
-                for (let i = 1; i < 5; i++) {
-                    const newRow = row + i * dx;
-                    const newCol = col + i * dy;
-                    if (isValidCell(newRow, newCol) && getCell(newRow, newCol).classList.contains(player)) {
-                        count++;
-                    } else {
-                        break;
-                    }
-                }
-
-                // 反向检查
-                for (let i = 1; i < 5; i++) {
-                    const newRow = row - i * dx;
-                    const newCol = col - i * dy;
-                    if (isValidCell(newRow, newCol) && getCell(newRow, newCol).classList.contains(player)) {
-                        count++;
-                    } else {
-                        break;
-                    }
-                }
-
-                if (count >= 5) {
-                    return true;
-                }
+    }
+}
+function displayStatus(msg) {
+    document.getElementById("status").innerHTML = msg;
+    document.getElementById("undoBtn").disabled = history.length === 0;
+}
+function cellClick(e) {
+    if (gameOver) return;
+    const row = +this.dataset.row, col = +this.dataset.col;
+    if (board[row][col] !== null) return;
+    board[row][col] = curPlayer;
+    history.push({row, col, player: curPlayer});
+    lastMove = [row, col];
+    renderBoard();
+    if (checkWin(row, col, curPlayer)) {
+        gameOver = true;
+        displayStatus(`${curPlayer==="black"?'&#9679; 黑棋':'<span style="color:#fff;text-shadow:0 1px 8px #736d40;">&#9675; 白棋</span>'} 胜利！<span style="font-size:1.1em;">🎉</span>`);
+        return;
+    }
+    if (history.length === BOARD_SIZE * BOARD_SIZE) {
+        gameOver = true;
+        displayStatus("棋局平局！");
+        return;
+    }
+    curPlayer = curPlayer === "black" ? "white" : "black";
+    displayStatus(`轮到 ${(curPlayer==="black")?"<b style='color:#222;'>&#9679; 黑棋</b>":"<b style='color:#946300;'>&#9675; 白棋</b>"}`);
+}
+function inBoard(x, y) {
+    return x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE;
+}
+function checkWin(row, col, player) {
+    const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+    for (const [dx,dy] of dirs) {
+        let count = 1;
+        for (let dir = -1; dir <= 1; dir += 2) {
+            let x = row + dx * dir, y = col + dy * dir;
+            while(inBoard(x, y) && board[x][y] === player) {
+                count++; x += dx * dir; y += dy * dir;
             }
-
-            return false;
         }
-
-        // 检查单元格是否有效
-        function isValidCell(row, col) {
-            return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
-        }
-
-        // 获取单元格元素
-        function getCell(row, col) {
-            return board.rows[row].cells[col];
-        }
-
-        // 悔棋功能
-        undoBtn.addEventListener('click', function () {
-            if (moves.length === 0) {
-                return;
-            }
-
-            const lastMove = moves.pop();
-            const cell = getCell(lastMove.row, lastMove.col);
-            cell.classList.remove(lastMove.player);
-            currentPlayer = lastMove.player;
-        });
-
-        // 重置游戏
-        function resetGame() {
-            moves.length = 0;
-            currentPlayer = 'black';
-            const cells = board.querySelectorAll('td');
-            cells.forEach(cell => {
-                cell.classList.remove('black', 'white');
-            });
-        }
-    </script>
+        if (count >= 5) return true;
+    }
+    return false;
+}
+function undoMove() {
+    if (!history.length) return;
+    if (gameOver) gameOver = false;
+    const move = history.pop();
+    board[move.row][move.col] = null;
+    curPlayer = move.player;
+    lastMove = history.length? [history[history.length-1].row, history[history.length-1].col] : null;
+    renderBoard();
+    displayStatus(`已悔棋。轮到 ${(curPlayer==="black")?"<b style='color:#222;'>&#9679; 黑棋</b>":"<b style='color:#946300;'>&#9675; 白棋</b>"}`);
+}
+function restartGame() {
+    createBoardArr();
+    renderBoard();
+    displayStatus("轮到 <b style='color:#222;'>&#9679; 黑棋</b>");
+}
+// 初始化
+createBoardArr();
+renderBoard();
+displayStatus("轮到 <b style='color:#222;'>&#9679; 黑棋</b>");
+</script>
 </body>
-
 </html>
-    
